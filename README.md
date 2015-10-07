@@ -22,7 +22,33 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+```ruby
+class Restaurant
+  extend Geocoder::Model::ActiveNode
+
+  include Neo4j::ActiveNode
+  include Neo4j::ActiveNode::Spatial
+
+  property :address
+  property :latitude
+  property :longitude
+
+  geocoded_by :address
+  after_validation :address, if: :address_changed?
+
+  spatial_index :restaurants
+end
+```
+
+* Query within distance
+
+```ruby
+Restaurant.near(location: 'Eiffel Tower', radius: 10.0).to_a
+```
+
+```
+ CYPHER 9ms START result_restaurant = node:restaurants({spatial_params}) MATCH (result_restaurant:`Restaurant`) MATCH (result_restaurant:`Restaurant`) RETURN result_restaurant | {:spatial_params=>"withinDistance:[48.85837009999999, 2.2944813, 10.0]"}
+```
 
 ## Development
 
@@ -32,5 +58,5 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/geocoder-neo4j_spatial.
+Bug reports and pull requests are welcome on GitHub at https://github.com/kajisha/geocoder-neo4j_spatial.
 
