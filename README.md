@@ -1,9 +1,5 @@
 # Geocoder::Neo4jSpatial
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/geocoder/neo4j_spatial`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
-
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -46,9 +42,20 @@ end
 Restaurant.near(location: 'Eiffel Tower', radius: 10.0).to_a
 ```
 
+or
+
+```ruby
+Restaurant.near(location: [48.85837009999999, 2.2944813], radius: 10.0).to_a
+```
+
+will generate following query:
+
 ```
  CYPHER 9ms START result_restaurant = node:restaurants({spatial_params}) MATCH (result_restaurant:`Restaurant`) MATCH (result_restaurant:`Restaurant`) RETURN result_restaurant | {:spatial_params=>"withinDistance:[48.85837009999999, 2.2944813, 10.0]"}
 ```
+
+* not implemented yet
+- within_bounding_box
 
 ## Development
 

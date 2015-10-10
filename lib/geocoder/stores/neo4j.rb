@@ -15,16 +15,26 @@ module Geocoder::Store
         }
 
         scope :near, -> (location:, radius:) {
-          coordinates = Geocoder::Calculations.extract_coordinates(location)
+          if location.is_a?(Array)
+            coordinates = location << radius.to_f
 
-          if Geocoder::Calculations.coordinates_present?(*coordinates)
-            coordinates << radius
-
-            query_proxy = instance_variable_get(:@query_proxy)
-            spatial_match(query_proxy.node_identity, "withinDistance:#{coordinates}")
+            within(coordinates)
           else
-            []
+            coordinates = Geocoder::Calculations.extract_coordinates(location)
+
+            if Geocoder::Calculations.coordinates_present?(*coordinates)
+              coordinates << radius.to_f
+
+              within(coordinates)
+            else
+              []
+            end
           end
+        }
+
+        scope :within, -> (coordinates) {
+          query_proxy = instance_variable_get(:@query_proxy)
+          spatial_match(query_proxy.node_identity, "withinDistance:#{coordinates}")
         }
       end
     end
@@ -33,8 +43,10 @@ module Geocoder::Store
       do_lookup(false) do |o, rs|
         if r = rs.first
           unless r.latitude.nil? or r.longitude.nil?
-            o.__send__  "#{self.class.geocoder_options[:latitude]}=",  r.latitude
-            o.__send__  "#{self.class.geocoder_options[:longitude]}=", r.longitude
+            o.__send__ "#{self.class.geocoder_options[:latitude]}=",  r.latitude
+            o.__send__ "#{self.class.geocoder_options[:longitude]}=", r.longitude
+
+            o.add_to_spatial_index o.class.spatial_index_name
           end
 
           r.coordinates
@@ -52,6 +64,12 @@ module Geocoder::Store
           r.address
         end
       end
+    end
+
+    def nearbys(radius = 20)
+      return nil unless geocoded?
+
+      self.class.near(location: to_coordinates, radius: radius)
     end
   end
 end
