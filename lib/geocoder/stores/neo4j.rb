@@ -25,7 +25,7 @@ module Geocoder::Store
             if Geocoder::Calculations.coordinates_present?(*coordinates)
               coordinates << radius.to_f
 
-              within(coordinates)
+              base.within(coordinates)
             else
               []
             end
