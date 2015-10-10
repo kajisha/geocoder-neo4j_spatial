@@ -18,7 +18,7 @@ module Geocoder::Store
           if location.is_a?(Array)
             coordinates = location << radius.to_f
 
-            within(coordinates)
+            base.within(coordinates)
           else
             coordinates = Geocoder::Calculations.extract_coordinates(location)
 
